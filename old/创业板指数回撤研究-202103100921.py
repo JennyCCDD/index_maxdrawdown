@@ -26,9 +26,8 @@ plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字�
 plt.rcParams['axes.unicode_minus'] = False   # 步骤二（解决坐标轴负数的负号显示问题）
 
 import time
-import datetime
 
-starttime = datetime.datetime.now()
+time_start=time.time()
 
 class Para():
     data_path = './data/'
@@ -263,44 +262,51 @@ if __name__ == '__main__':
 
     # In[]
     # 4. 当反向最大回撤达到20%/25%/30%/35%/40%时,指数在反弹至期初点位的概率及期限分布
+    # def reverseMaxDrawdown(data, maxdd,colname='close', period='all'):
+    #     return
 
     datas4 = datas.copy(deep=True)
 
-
-    # In[]
     for i in range(datas4.shape[0]-10):
-        if datas4['maxdd'].iloc[i] > para.maxddbound:
-            for j in range(i+10, datas4.shape[0]):
+        for j in range(i+10, datas4.shape[0]):
 
-                maxdd,_,_ = MaxDrawdown(datas4.iloc[i:j], colname='close', period='all')
-                if (maxdd > float(para.maxddbound)) and (maxdd < (float(para.maxddbound)+0.05)):
-                    begin_index = int(datas4['close'].iloc[j])
-                    dates_begin = j
-                    datas5 = datas4.iloc[j:]
-                    dates_back = datas5.loc[(datas5['close']>begin_index)&
-                                            (datas5['close']<(1+begin_index))].number.values
+            maxdd,_,_ = MaxDrawdown(datas4.iloc[i:j], colname='close', period='all')
+            # print(datas4['maxdd'].iloc[i],'--------------------------------------',maxdd)
+            if (maxdd > float(para.maxddbound)) and (maxdd < (float(para.maxddbound)+0.05)):
+                begin_index = int(datas4['close'].iloc[j])
+                dates_begin = j
+                datas5 = datas4.iloc[j:]
+                dates_back = datas5.loc[(datas5['close']>begin_index)&
+                                        (datas5['close']<(1+begin_index))].number.values
 
-                    if len(dates_back) > 1:
-                        backtime = dates_back[1]-dates_begin
-                        print(backtime)
-                        datas4.loc[datas4['number'] ==  i,'maxdd_backtime_bound=%s' % para.maxddbound] \
-                            = backtime
+                if len(dates_back) > 1:
+                    backtime = dates_back[1]-dates_begin
+                    print(backtime)
+                    datas4.loc[datas4['number'] ==  dates_back[1],'maxdd_backtime_bound=%s' % para.maxddbound] \
+                        = backtime
+
+
+
+
+    # datas4['maxdd_backtime_bound=%s'%para.maxddbound]=[0]*len(datas4)
+    # datas4['flag'] = [0]*len(datas4)
+    # datas4.loc[datas4['maxdd']>para.maxddbound]['flag'] = 1
+    # dates4 = datas4.loc[datas4['maxdd']>para.maxddbound,'number'].tolist()
+    #
+    # for date_i, index_i in enumerate(dates4):
+    #
+    #     datas5 = datas4.iloc[index_i:]
+    #     begin_index = int(datas5['close'].iloc[0])
+    #     dates_begin = index_i
+    #     dates_back = datas5.loc[(datas5['close']>begin_index)&
+    #                             (datas5['close']<(1+begin_index))].number.values
+    #
+    #     if len(dates_back) > 1:
+    #         backtime = max(dates_back)-dates_begin
+    #         datas4.loc[datas4['number'] ==  max(dates_back),'maxdd_backtime_bound=%s' % para.maxddbound] \
+    #             = backtime
 
     datas4.to_csv(para.result_path+'datas4_%s'%para.maxddbound+'.csv',encoding='utf8')
 
-
-    # In[]
-    # 计算程序运行时间
-    endtime = datetime.datetime.now()
-    def timeStr(s):
-        if s < 10:
-            return '0' + str(s)
-        else:
-            return str(s)
-    print("程序开始运行时间：" + timeStr(starttime.hour) + ":" + timeStr(starttime.minute) + ":" + timeStr(starttime.second))
-    print("程序结束运行时间：" + timeStr(endtime.hour) + ":" + timeStr(endtime.minute) + ":" + timeStr(endtime.second))
-    runTime = (endtime - starttime).seconds
-    runTimehour = runTime // 3600  # 除法并向下取整，整除
-    runTimeminute = (runTime - runTimehour * 3600) // 60
-    runTimesecond = runTime - runTimehour * 3600 - runTimeminute * 60
-    print("程序运行耗时：" + str(runTimehour) + "时" + str(runTimeminute) + "分" + str(runTimesecond) + "秒")
+    time_end = time.time()
+    print('totally cost', time_end - time_start)
