@@ -37,7 +37,7 @@ class Para():
     begin_date = '2010-06-01'
     end_date = '2021-03-08'
     win = 360
-    maxddbound = 0.2
+    maxddbound = 0.25
     pass
 
 
